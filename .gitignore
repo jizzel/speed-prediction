@@ -1,0 +1,11 @@
+*.iml
+.idea/.gitignore
+.idea/inspectionProfiles/*
+.idea/caches
+.idea/*.iml
+.idea/*.xml
+/.OFEBDA.pptx
+__pycache__/*
+/experim
+/out.flo
+
