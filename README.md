@@ -1,7 +1,7 @@
-## **Optical Flow Estimation Based on Deep Learning Approaches**
-# **Predicting the Speed of a Car from a Dashboad Camera Video**
+# **Optical Flow Estimation Based on Deep Learning Approaches**
+### **Predicting the Speed of a Vehicle from a Dashboad Camera Video**
 **Abstract**
-ABSTRACT
+
 
 The recent advancement in artificial intelligence (AI) and the rapid increase in the computation ability of modern computers has boosted capacities in solving problems. One of the goals of computer science is to enable computers to see like humans. This is somewhat achieved through image and video processing and analysis under the computer vision branch of computer science [1]. Just as the human visual system has a stimulus for the perception of the shape, distance and movement of objects in the real world and control of locomotion, it is also vital for computers to be able to do the same [5]. Videos come with a great amount of information, analyzing them enable us to handle problems such as motion detection and tracking as well as speed estimation. Speed estimation of moving objects from video cameras is one of the most important topics in the field of computer vision. It is one of the key pieces to look at in transport systems, robotics, military and naval operations, sports and among others. In this study, we explore modern optical flow methods which apply deep learning approaches and prioritizes motion as a key characteristic of classification [2]–[4] and use convolutional neural networks (CNN) to predict, with better accuracy, the speed of a car from a car dashboard camera footage.
  
