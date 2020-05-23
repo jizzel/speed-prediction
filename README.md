@@ -1,7 +1,7 @@
 ## **Optical Flow Estimation Based on Deep Learning Approaches** 
-**How to Setup And Test (Use) The Application**
+**How to Setup And Test (Use) The Program**
  
-  The entire process of running the application includes:
+  The entire process of running the program includes:
 1.  Make sure the videos and the labels are in the “data/” folder.
 2.  Make sure your PC/server meets the system setup requirements below:
 - CUDA enable GPU.

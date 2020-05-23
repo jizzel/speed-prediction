@@ -55,7 +55,7 @@ def preprocess_data(video_input_path, flow_video_output_path, image_folder_path,
     cv2.imwrite(image_path_out, prev_frame)
 
     print('Starting now...')
-    prev_frame = elaborateImage(prev_frame)
+    prev_frame = get_roi(prev_frame)
 
     count = 1
     while True:
@@ -66,7 +66,7 @@ def preprocess_data(video_input_path, flow_video_output_path, image_folder_path,
         # print('before frame: ', prev_frame)
 
         # prev_frame = elaborateImage(prev_frame)
-        next_frame = elaborateImage(next_frame)
+        next_frame = get_roi(next_frame)
 
         # print('after frame: ', prev_frame)
         # print('after dimension: ', prev_frame.shape)
