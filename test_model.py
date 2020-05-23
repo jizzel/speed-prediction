@@ -4,7 +4,7 @@ import time
 import cv2
 import numpy as np
 
-from model import CNNModel
+from model import cnn_model
 from optical_flow import get_optical_flow
 
 PATH_DATA_FOLDER = './data/'
@@ -111,7 +111,7 @@ def predict_from_video(video_input_path, original_video_output_path, combined_vi
 
 if __name__ == '__main__':
 
-    model = CNNModel()
+    model = cnn_model()
     model.load_weights(PRE_TRAINED_WEIGHTS)
 
     print('Testing model...')

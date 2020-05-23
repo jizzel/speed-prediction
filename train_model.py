@@ -9,7 +9,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 
-from model import CNNModel
+from model import cnn_model
 
 PATH_DATA_FOLDER = './data/'
 PATH_TRAIN_LABEL = PATH_DATA_FOLDER + 'train.txt'
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     print('Training model...')
     t1 = time.time()
 
-    model = CNNModel()
+    model = cnn_model()
 
     callbacks = [EarlyStopping(monitor='val_loss', patience=7, mode='auto'),
                  ModelCheckpoint(filepath='best' + MODEL_NAME + '.h5', monitor='val_loss', save_best_only=True, mode='auto')]

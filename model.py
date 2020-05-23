@@ -1,9 +1,10 @@
 from keras.models import Sequential
-from keras.layers import Flatten, Dense, Lambda, Conv2D, Cropping2D, Dropout, Reshape, BatchNormalization, ELU, MaxPooling2D
+from keras.layers import Flatten, Dense, Lambda, Conv2D, Cropping2D, Dropout, \
+    Reshape, BatchNormalization, ELU, MaxPooling2D
 from keras.optimizers import Adam
 
 
-def CNNModel():
+def cnn_model():
     model = Sequential()
     model.add(Conv2D(12, (5, 5), activation='elu', input_shape=(240, 320, 3), kernel_initializer='he_normal'))
     model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
@@ -24,6 +25,6 @@ def CNNModel():
     model.add(Dense(10, kernel_initializer='he_normal', activation='elu'))
     model.add(Dense(1, kernel_initializer='he_normal', activation='elu'))
     adam = Adam(lr=1e-3)
-    model.compile(optimizer=adam, loss='mse', metrics=['accuracy'])
+    model.compile(optimizer=adam, loss='mse')
 
     return model
