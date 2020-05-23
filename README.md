@@ -8,10 +8,11 @@
 - At least 8 Gigabytes of RAM size will not freeze the system.
 4.  Make sure python3 and the required libraries which includes the following are installed:
     Pytorch (with cuda).
-- OpenCV
+- openCV
 - Numpy
 - Matplotlib.pyplot
 - keras
+- scikit-learn
 - flowiz
 - PIL.Image
 5. Run “python main.py” to convert videos (train.mp4 and test.mp4) to images and to optical flow.
