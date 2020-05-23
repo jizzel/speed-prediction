@@ -6,6 +6,6 @@
 .idea/*.xml
 /.OFEBDA.pptx
 __pycache__/*
-/experim
+/experiment
 /out.flo
 
