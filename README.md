@@ -27,9 +27,9 @@ The recent advancement in artificial intelligence (AI) and the rapid increase in
 8. After step f, the output is stored as in the root directory as a video named, “test_output.mp4”
 
 **References**
-[1]	J. Brownlee, ‘Understand the Impact of Learning Rate on Neural Network Performance’, Machine Learning Mastery, Jan. 24, 2019. https://machinelearningmastery.com/understand-the-dynamics-of-learning-rate-on-deep-learning-neural-networks/ (accessed May 19, 2020).
-[2]	F. D, ‘Batch normalization in Neural Networks’, Medium, Oct. 25, 2017. https://towardsdatascience.com/batch-normalization-in-neural-networks-1ac91516821c (accessed May 19, 2020).
-[3]	J. Brownlee, ‘Dropout Regularization in Deep Learning Models With Keras’, Machine Learning Mastery, Jun. 19, 2016. https://machinelearningmastery.com/dropout-regularization-deep-learning-models-keras/ (accessed May 19, 2020).
-[4]	A. Burton and J. Radford, Thinking in perspective: critical essays in the study of thought processes. Methuen, 1978.
-[5]	B. K. P. Horn and B. G. Schunck, ‘Determining Optical Flow’, p. 19.
+- [1]	J. Brownlee, ‘Understand the Impact of Learning Rate on Neural Network Performance’, Machine Learning Mastery, Jan. 24, 2019. https://machinelearningmastery.com/understand-the-dynamics-of-learning-rate-on-deep-learning-neural-networks/ (accessed May 19, 2020).
+- [2]	F. D, ‘Batch normalization in Neural Networks’, Medium, Oct. 25, 2017. https://towardsdatascience.com/batch-normalization-in-neural-networks-1ac91516821c (accessed May 19, 2020).
+- [3]	J. Brownlee, ‘Dropout Regularization in Deep Learning Models With Keras’, Machine Learning Mastery, Jun. 19, 2016. https://machinelearningmastery.com/dropout-regularization-deep-learning-models-keras/ (accessed May 19, 2020).
+- [4]	A. Burton and J. Radford, Thinking in perspective: critical essays in the study of thought processes. Methuen, 1978.
+- [5]	B. K. P. Horn and B. G. Schunck, ‘Determining Optical Flow’, p. 19.
 
