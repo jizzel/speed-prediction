@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from enhance_image import *
 
-from optical_flow import convertToOpticalFlow
+from optical_flow import get_optical_flow
 
 PATH_DATA_FOLDER = './data/'
 
@@ -31,30 +31,26 @@ def preprocess_data(video_input_path, flow_video_output_path, image_folder_path,
         shutil.rmtree(flow_image_folder_path)
     os.makedirs(flow_image_folder_path)
 
-    print("Converting video to optical flow for: ", video_input_path)
+    print("Cutting out video frames and Converting video to optical flow for: ", video_input_path)
 
     video_reader = cv2.VideoCapture(video_input_path)
-    # print('video path: ', video_input_path)
-    # print('video reader: ', video_reader)
 
-    num_frames = video_reader.get(cv2.CAP_PROP_FRAME_COUNT)
     frame_size = (int(video_reader.get(cv2.CAP_PROP_FRAME_WIDTH)), int(video_reader.get(cv2.CAP_PROP_FRAME_HEIGHT)))
     fps = int(video_reader.get(cv2.CAP_PROP_FPS))
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    # fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    # fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
-    # fourcc = 0x763470d
     video_writer = cv2.VideoWriter(flow_video_output_path, fourcc, fps, frame_size)
 
+    # Get initial time
     t1 = time.time()
+    # Get video frames and save
     ret, prev_frame = video_reader.read()
     hsv = np.zeros_like(prev_frame)
-
     image_path_out = os.path.join(image_folder_path, str(0) + '.png')
     cv2.imwrite(image_path_out, prev_frame)
 
     print('Starting now...')
+    # Get Region of Interest
     prev_frame = get_roi(prev_frame)
 
     count = 1
@@ -62,16 +58,10 @@ def preprocess_data(video_input_path, flow_video_output_path, image_folder_path,
         ret, next_frame = video_reader.read()
         if next_frame is None:
             break
-        # print('before dimension: ', prev_frame.shape)
-        # print('before frame: ', prev_frame)
 
-        # prev_frame = elaborateImage(prev_frame)
         next_frame = get_roi(next_frame)
 
-        # print('after frame: ', prev_frame)
-        # print('after dimension: ', prev_frame.shape)
-
-        bgr_flow = convertToOpticalFlow(prev_frame, next_frame)
+        bgr_flow = get_optical_flow(prev_frame, next_frame)
 
         image_path_out = os.path.join(image_folder_path, str(count) + '.png')
         flow_image_path_out = os.path.join(flow_image_folder_path, str(count) + '.png')
@@ -80,7 +70,6 @@ def preprocess_data(video_input_path, flow_video_output_path, image_folder_path,
         cv2.imwrite(flow_image_path_out, bgr_flow)
 
         video_writer.write(bgr_flow)
-        # print('Counting ', count)
         sys.stdout.write('\rprocessed frames: %d' % count)
 
         prev_frame = next_frame
@@ -98,7 +87,7 @@ def preprocess_data(video_input_path, flow_video_output_path, image_folder_path,
 if __name__ == '__main__':
     '''PREPROCESS DATA DOES 3 THINGS:
         1. Convert video to optical flow and save their respective images
-        2. Augment image and optical flow data by Inverting them horizontally'''  ## NOW DONE IN TRAIN_MODEL.PY ITSELF IN GENERATOR DATA
+        2. Augment image and optical flow data by Inverting them horizontally'''
 
     preprocess_data(PATH_TRAIN_VIDEO, PATH_TRAIN_FLOW_VIDEO, PATH_TRAIN_IMAGES_FOLDER, PATH_TRAIN_IMAGES_FLOW_FOLDER,
                     type='train')

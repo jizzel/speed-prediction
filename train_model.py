@@ -1,21 +1,15 @@
-# from model2 import CNNModel
-# from model3 import CNNModel
+import os
 import time
 
-from model import CNNModel
-
 import cv2
-import numpy as np
-import os
 import matplotlib.pyplot as plt
-
+import numpy as np
 import sklearn
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 
-from keras.callbacks import EarlyStopping, ModelCheckpoint
-
-from optical_flow import convertToOpticalFlow
+from model import CNNModel
 
 PATH_DATA_FOLDER = './data/'
 PATH_TRAIN_LABEL = PATH_DATA_FOLDER + 'train.txt'
@@ -31,75 +25,49 @@ EPOCH = 50
 MODEL_NAME = 'CNNModel_flow'
 
 
-# MODEL_NAME = 'CNNModel_combined'
-
-
-def prepareData(labels_path, images_path, flow_images_path, type=TYPE_FLOW_PRECOMPUTED):
+def prepare_data(labels_path, images_path, flow_images_path):
     num_train_labels = 0
-    train_labels = []
-    train_images_pair_paths = []
+    p_train_labels = []
+    p_train_images_pair_paths = []
 
     with open(labels_path) as txt_file:
         labels_string = txt_file.read().split()
 
         for i in range(4, len(labels_string)):
             speed = float(labels_string[i])
-            train_labels.append(speed)
+            p_train_labels.append(speed)
             num_train_labels += 1
+            # Combine original and pre computed optical flow
+            p_train_images_pair_paths.append((os.getcwd() + images_path[1:] + str(i) + '.png',
+                                              os.getcwd() + flow_images_path[1:] + str(i - 3) + '.png',
+                                              os.getcwd() + flow_images_path[1:] + str(i - 2) + '.png',
+                                              os.getcwd() + flow_images_path[1:] + str(i - 1) + '.png',
+                                              os.getcwd() + flow_images_path[1:] + str(i) + '.png'))
 
-            if type == TYPE_FLOW_PRECOMPUTED:
-                # Combine original and pre computed optical flow
-                train_images_pair_paths.append((os.getcwd() + images_path[1:] + str(i) + '.png',
-                                                os.getcwd() + flow_images_path[1:] + str(i - 3) + '.png',
-                                                os.getcwd() + flow_images_path[1:] + str(i - 2) + '.png',
-                                                os.getcwd() + flow_images_path[1:] + str(i - 1) + '.png',
-                                                os.getcwd() + flow_images_path[1:] + str(i) + '.png'))
-            else:
-                # Combine 2 consecutive frames and calculate optical flow
-                train_images_pair_paths.append((os.getcwd() + images_path[1:] + str(i - 1) + '.png',
-                                                os.getcwd() + images_path[1:] + str(i) + '.png'))
-
-    return train_images_pair_paths, train_labels, num_train_labels
+    return p_train_images_pair_paths, p_train_labels, num_train_labels
 
 
-def generatorData(samples, batch_size=32, type=TYPE_FLOW_PRECOMPUTED):
-    num_samples = len(samples)
+def generator_data(g_samples, batch_size=32):
+    num_samples = len(g_samples)
 
     while 1:  # Loop forever so the generator never terminates
-        samples = sklearn.utils.shuffle(samples)
+        g_samples = sklearn.utils.shuffle(g_samples)
         for offset in range(0, num_samples, batch_size):
-            batch_samples = samples[offset:offset + batch_size]
+            batch_samples = g_samples[offset:offset + batch_size]
 
             images = []
             angles = []
             for imagePath, measurement in batch_samples:
 
-                combined_image = None
-                flow_image_bgr = None
+                curr_image_path, flow_image_path1, flow_image_path2, flow_image_path3, flow_image_path4 = imagePath
+                path1 = cv2.imread(flow_image_path1)
+                path2 = cv2.imread(flow_image_path2)
+                path3 = cv2.imread(flow_image_path3)
+                path4 = cv2.imread(flow_image_path4)
 
-                if type == TYPE_FLOW_PRECOMPUTED:
+                a = (path1 + path2 + path3 + path4)
+                flow_image_bgr = a / 4
 
-                    curr_image_path, flow_image_path1, flow_image_path2, flow_image_path3, flow_image_path4 = imagePath
-                    path1 = cv2.imread(flow_image_path1)
-                    path2 = cv2.imread(flow_image_path2)
-                    path3 = cv2.imread(flow_image_path3)
-                    path4 = cv2.imread(flow_image_path4)
-
-                    a = (path1 + path2 + path3 + path4)
-                    flow_image_bgr = a / 4
-
-                    curr_image = cv2.imread(curr_image_path)
-                    curr_image = cv2.cvtColor(curr_image, cv2.COLOR_BGR2RGB)
-
-                else:
-                    prev_image_path, curr_image_path = imagePath
-                    prev_image = cv2.imread(prev_image_path)
-                    curr_image = cv2.imread(curr_image_path)
-                    flow_image_bgr = convertToOpticalFlow(prev_image, curr_image)
-                    curr_image = cv2.cvtColor(curr_image, cv2.COLOR_BGR2RGB)
-
-                combined_image = 0.1 * curr_image + flow_image_bgr
-                # CHOOSE IF WE WANT TO TEST WITH ONLY OPTICAL FLOW OR A COMBINATION OF VIDEO AND OPTICAL FLOW
                 combined_image = flow_image_bgr
 
                 combined_image = cv2.normalize(combined_image, None, alpha=-1, beta=1, norm_type=cv2.NORM_MINMAX,
@@ -121,11 +89,9 @@ def generatorData(samples, batch_size=32, type=TYPE_FLOW_PRECOMPUTED):
 
 
 if __name__ == '__main__':
-    type_ = TYPE_FLOW_PRECOMPUTED  # optical flow pre computed
-    # type_ = TYPE_ORIGINAL
 
-    train_images_pair_paths, train_labels, labels_count = prepareData(PATH_TRAIN_LABEL, PATH_TRAIN_IMAGES_FOLDER,
-                                                                      PATH_TRAIN_IMAGES_FLOW_FOLDER, type=type_)
+    train_images_pair_paths, train_labels, labels_count = prepare_data(PATH_TRAIN_LABEL, PATH_TRAIN_IMAGES_FOLDER,
+                                                                       PATH_TRAIN_IMAGES_FLOW_FOLDER)
 
     samples = list(zip(train_images_pair_paths, train_labels))
     train_samples, validation_samples = train_test_split(samples, test_size=0.15)
@@ -135,8 +101,8 @@ if __name__ == '__main__':
     print('Validation samples: {}'.format(len(validation_samples)))
     print('Number of labels: {}'.format(labels_count))
 
-    training_generator = generatorData(train_samples, batch_size=BATCH_SIZE, type=type_)
-    validation_generator = generatorData(validation_samples, batch_size=BATCH_SIZE, type=type_)
+    training_generator = generator_data(train_samples, batch_size=BATCH_SIZE)
+    validation_generator = generator_data(validation_samples, batch_size=BATCH_SIZE)
 
     print('Training model...')
     t1 = time.time()

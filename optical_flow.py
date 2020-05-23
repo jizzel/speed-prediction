@@ -33,7 +33,8 @@ for strOption, strArgument in \
     if strOption == '--model' and strArgument != '': arguments_strModel = strArgument  # which model to use, see below
     if strOption == '--first' and strArgument != '': arguments_strFirst = strArgument  # path to the first frame
     if strOption == '--second' and strArgument != '': arguments_strSecond = strArgument  # path to the second frame
-    if strOption == '--out' and strArgument != '': arguments_strOut = strArgument  # path to where the output should be stored
+    if strOption == '--out' and strArgument != '': arguments_strOut = strArgument  # path to where the output should
+    # be stored
 # end
 
 ##########################################################
@@ -41,23 +42,24 @@ for strOption, strArgument in \
 Backward_tensorGrid = {}
 
 
-def Backward(tensorInput, tensorFlow):
-    if str(tensorFlow.size()) not in Backward_tensorGrid:
-        tensorHorizontal = torch.linspace(-1.0, 1.0, tensorFlow.size(3)).view(1, 1, 1, tensorFlow.size(3)).expand(
-            tensorFlow.size(0), -1, tensorFlow.size(2), -1)
-        tensorVertical = torch.linspace(-1.0, 1.0, tensorFlow.size(2)).view(1, 1, tensorFlow.size(2), 1).expand(
-            tensorFlow.size(0), -1, -1, tensorFlow.size(3))
+def get_backward(tensor_input, tensor_flow):
+    if str(tensor_flow.size()) not in Backward_tensorGrid:
+        tensor_horizontal = torch.linspace(-1.0, 1.0, tensor_flow.size(3)).view(1, 1, 1, tensor_flow.size(3)).expand(
+            tensor_flow.size(0), -1, tensor_flow.size(2), -1)
+        tensor_vertical = torch.linspace(-1.0, 1.0, tensor_flow.size(2)).view(1, 1, tensor_flow.size(2), 1).expand(
+            tensor_flow.size(0), -1, -1, tensor_flow.size(3))
 
-        Backward_tensorGrid[str(tensorFlow.size())] = torch.cat([tensorHorizontal, tensorVertical], 1).cuda()
+        Backward_tensorGrid[str(tensor_flow.size())] = torch.cat([tensor_horizontal, tensor_vertical], 1).cuda()
     # end
 
-    tensorFlow = torch.cat([tensorFlow[:, 0:1, :, :] / ((tensorInput.size(3) - 1.0) / 2.0),
-                            tensorFlow[:, 1:2, :, :] / ((tensorInput.size(2) - 1.0) / 2.0)], 1)
+    tensor_flow = torch.cat([tensor_flow[:, 0:1, :, :] / ((tensor_input.size(3) - 1.0) / 2.0),
+                             tensor_flow[:, 1:2, :, :] / ((tensor_input.size(2) - 1.0) / 2.0)], 1)
 
-    return torch.nn.functional.grid_sample(input=tensorInput,
-                                           grid=(Backward_tensorGrid[str(tensorFlow.size())] + tensorFlow).permute(0, 2,
-                                                                                                                   3,
-                                                                                                                   1),
+    return torch.nn.functional.grid_sample(input=tensor_input,
+                                           grid=(Backward_tensorGrid[str(tensor_flow.size())] + tensor_flow).permute(0,
+                                                                                                                     2,
+                                                                                                                     3,
+                                                                                                                     1),
                                            mode='bilinear', padding_mode='border', align_corners=True)
 
 
@@ -75,19 +77,19 @@ class Network(torch.nn.Module):
 
             # end
 
-            def forward(self, tensorInput):
-                tensorBlue = (tensorInput[:, 0:1, :, :] - 0.406) / 0.225
-                tensorGreen = (tensorInput[:, 1:2, :, :] - 0.456) / 0.224
-                tensorRed = (tensorInput[:, 2:3, :, :] - 0.485) / 0.229
+            def forward(self, n_tensor_input):
+                tensor_blue = (n_tensor_input[:, 0:1, :, :] - 0.406) / 0.225
+                tensor_green = (n_tensor_input[:, 1:2, :, :] - 0.456) / 0.224
+                tensor_red = (n_tensor_input[:, 2:3, :, :] - 0.485) / 0.229
 
-                return torch.cat([tensorRed, tensorGreen, tensorBlue], 1)
+                return torch.cat([tensor_red, tensor_green, tensor_blue], 1)
 
         # end
 
         # end
 
         class Basic(torch.nn.Module):
-            def __init__(self, intLevel):
+            def __init__(self, int_level):
                 super(Basic, self).__init__()
 
                 self.moduleBasic = torch.nn.Sequential(
@@ -104,8 +106,8 @@ class Network(torch.nn.Module):
 
             # end
 
-            def forward(self, tensorInput):
-                return self.moduleBasic(tensorInput)
+            def forward(self, d_tensor_input):
+                return self.moduleBasic(d_tensor_input)
 
         # end
 
@@ -119,39 +121,42 @@ class Network(torch.nn.Module):
 
     # end
 
-    def forward(self, tensorFirst, tensorSecond):
-        tensorFlow = []
+    def forward(self, f_tensor_first, f_tensor_second):
 
-        tensorFirst = [self.modulePreprocess(tensorFirst)]
-        tensorSecond = [self.modulePreprocess(tensorSecond)]
+        f_tensor_first = [self.modulePreprocess(f_tensor_first)]
+        f_tensor_second = [self.modulePreprocess(f_tensor_second)]
 
         for intLevel in range(5):
-            if tensorFirst[0].size(2) > 32 or tensorFirst[0].size(3) > 32:
-                tensorFirst.insert(0, torch.nn.functional.avg_pool2d(input=tensorFirst[0], kernel_size=2, stride=2,
+            if f_tensor_first[0].size(2) > 32 or f_tensor_first[0].size(3) > 32:
+                f_tensor_first.insert(0,
+                                      torch.nn.functional.avg_pool2d(input=f_tensor_first[0], kernel_size=2, stride=2,
                                                                      count_include_pad=False))
-                tensorSecond.insert(0, torch.nn.functional.avg_pool2d(input=tensorSecond[0], kernel_size=2, stride=2,
+                f_tensor_second.insert(0,
+                                       torch.nn.functional.avg_pool2d(input=f_tensor_second[0], kernel_size=2, stride=2,
                                                                       count_include_pad=False))
         # end
         # end
 
-        tensorFlow = tensorFirst[0].new_zeros([tensorFirst[0].size(0), 2, int(math.floor(tensorFirst[0].size(2) / 2.0)),
-                                               int(math.floor(tensorFirst[0].size(3) / 2.0))])
+        tensor_flow = f_tensor_first[0].new_zeros(
+            [f_tensor_first[0].size(0), 2, int(math.floor(f_tensor_first[0].size(2) / 2.0)),
+             int(math.floor(f_tensor_first[0].size(3) / 2.0))])
 
-        for intLevel in range(len(tensorFirst)):
-            tensorUpsampled = torch.nn.functional.interpolate(input=tensorFlow, scale_factor=2, mode='bilinear',
-                                                              align_corners=True) * 2.0
+        for intLevel in range(len(f_tensor_first)):
+            tensor_upsampled = torch.nn.functional.interpolate(input=tensor_flow, scale_factor=2, mode='bilinear',
+                                                               align_corners=True) * 2.0
 
-            if tensorUpsampled.size(2) != tensorFirst[intLevel].size(2): tensorUpsampled = torch.nn.functional.pad(
-                input=tensorUpsampled, pad=[0, 0, 0, 1], mode='replicate')
-            if tensorUpsampled.size(3) != tensorFirst[intLevel].size(3): tensorUpsampled = torch.nn.functional.pad(
-                input=tensorUpsampled, pad=[0, 1, 0, 0], mode='replicate')
+            if tensor_upsampled.size(2) != f_tensor_first[intLevel].size(2): tensor_upsampled = torch.nn.functional.pad(
+                input=tensor_upsampled, pad=[0, 0, 0, 1], mode='replicate')
+            if tensor_upsampled.size(3) != f_tensor_first[intLevel].size(3): tensor_upsampled = torch.nn.functional.pad(
+                input=tensor_upsampled, pad=[0, 1, 0, 0], mode='replicate')
 
-            tensorFlow = self.moduleBasic[intLevel](torch.cat(
-                [tensorFirst[intLevel], Backward(tensorInput=tensorSecond[intLevel], tensorFlow=tensorUpsampled),
-                 tensorUpsampled], 1)) + tensorUpsampled
+            tensor_flow = self.moduleBasic[intLevel](torch.cat(
+                [f_tensor_first[intLevel],
+                 get_backward(tensor_input=f_tensor_second[intLevel], tensor_flow=tensor_upsampled),
+                 tensor_upsampled], 1)) + tensor_upsampled
         # end
 
-        return tensorFlow
+        return tensor_flow
 
 
 # end
@@ -164,58 +169,53 @@ moduleNetwork = Network().cuda().eval()
 
 ##########################################################
 
-def estimate(tensorFirst, tensorSecond):
-    assert (tensorFirst.size(1) == tensorSecond.size(1))
-    assert (tensorFirst.size(2) == tensorSecond.size(2))
+def estimate(tensor_first, tensor_second):
+    assert (tensor_first.size(1) == tensor_second.size(1))
+    assert (tensor_first.size(2) == tensor_second.size(2))
 
-    intWidth = tensorFirst.size(2)
-    intHeight = tensorFirst.size(1)
+    int_width = tensor_first.size(2)
+    int_height = tensor_first.size(1)
 
-    # assert(intWidth == 1024) # remember that there is no guarantee for correctness, comment this line out if you acknowledge this and want to continue
-    # assert(intHeight == 416) # remember that there is no guarantee for correctness, comment this line out if you acknowledge this and want to continue
+    tensor_preprocessed_first = tensor_first.cuda().view(1, 3, int_height, int_width)
+    tensor_preprocessed_second = tensor_second.cuda().view(1, 3, int_height, int_width)
 
-    tensorPreprocessedFirst = tensorFirst.cuda().view(1, 3, intHeight, intWidth)
-    tensorPreprocessedSecond = tensorSecond.cuda().view(1, 3, intHeight, intWidth)
+    int_preprocessed_width = int(math.floor(math.ceil(int_width / 32.0) * 32.0))
+    int_preprocessed_height = int(math.floor(math.ceil(int_height / 32.0) * 32.0))
 
-    intPreprocessedWidth = int(math.floor(math.ceil(intWidth / 32.0) * 32.0))
-    intPreprocessedHeight = int(math.floor(math.ceil(intHeight / 32.0) * 32.0))
+    tensor_preprocessed_first = torch.nn.functional.interpolate(input=tensor_preprocessed_first,
+                                                                size=(int_preprocessed_height, int_preprocessed_width),
+                                                                mode='bilinear', align_corners=False)
+    tensor_preprocessed_second = torch.nn.functional.interpolate(input=tensor_preprocessed_second,
+                                                                 size=(int_preprocessed_height, int_preprocessed_width),
+                                                                 mode='bilinear', align_corners=False)
 
-    tensorPreprocessedFirst = torch.nn.functional.interpolate(input=tensorPreprocessedFirst,
-                                                              size=(intPreprocessedHeight, intPreprocessedWidth),
-                                                              mode='bilinear', align_corners=False)
-    tensorPreprocessedSecond = torch.nn.functional.interpolate(input=tensorPreprocessedSecond,
-                                                               size=(intPreprocessedHeight, intPreprocessedWidth),
-                                                               mode='bilinear', align_corners=False)
+    tensor_flow = torch.nn.functional.interpolate(
+        input=moduleNetwork(tensor_preprocessed_first, tensor_preprocessed_second),
+        size=(int_height, int_width), mode='bilinear', align_corners=False)
 
-    tensorFlow = torch.nn.functional.interpolate(input=moduleNetwork(tensorPreprocessedFirst, tensorPreprocessedSecond),
-                                                 size=(intHeight, intWidth), mode='bilinear', align_corners=False)
+    tensor_flow[:, 0, :, :] *= float(int_width) / float(int_preprocessed_width)
+    tensor_flow[:, 1, :, :] *= float(int_height) / float(int_preprocessed_height)
 
-    tensorFlow[:, 0, :, :] *= float(intWidth) / float(intPreprocessedWidth)
-    tensorFlow[:, 1, :, :] *= float(intHeight) / float(intPreprocessedHeight)
-
-    return tensorFlow[0, :, :, :].cpu()
+    return tensor_flow[0, :, :, :].cpu()
 
 
 # end
 
 ##########################################################
-def convertToOpticalFlow(first_img, second_image):
-    # tensorFirst = torch.FloatTensor(numpy.array(first_img)[:, ::-1].transpose(1, 0).astype(numpy.float32) * (1.0 / 255.0))
-    # tensorSecond = torch.FloatTensor(numpy.array(second_image)[:, ::-1].transpose(1, 0).astype(numpy.float32) * (1.0 / 255.0))
-    tensorFirst = torch.FloatTensor(numpy.array(first_img)[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0))
-    tensorSecond = torch.FloatTensor(numpy.array(second_image)[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0))
-    # tensorFirst = torch.FloatTensor(numpy.array(PIL.Image.open(first_img))[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0))
-    # tensorSecond = torch.FloatTensor(numpy.array(PIL.Image.open(second_image))[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0))
+def get_optical_flow(first_img, second_image):
+    first_tensor = torch.FloatTensor(
+        numpy.array(first_img)[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0))
+    second_tensor = torch.FloatTensor(
+        numpy.array(second_image)[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0))
+    tensor_output = estimate(first_tensor, second_tensor)
 
-    tensorOutput = estimate(tensorFirst, tensorSecond)
+    object_output = open(arguments_strOut, 'wb')
 
-    objectOutput = open(arguments_strOut, 'wb')
+    numpy.array([80, 73, 69, 72], numpy.uint8).tofile(object_output)
+    numpy.array([tensor_output.size(2), tensor_output.size(1)], numpy.int32).tofile(object_output)
+    numpy.array(tensor_output.detach().numpy().transpose(1, 2, 0), numpy.float32).tofile(object_output)
 
-    numpy.array([80, 73, 69, 72], numpy.uint8).tofile(objectOutput)
-    numpy.array([tensorOutput.size(2), tensorOutput.size(1)], numpy.int32).tofile(objectOutput)
-    numpy.array(tensorOutput.detach().numpy().transpose(1, 2, 0), numpy.float32).tofile(objectOutput)
-
-    objectOutput.close()
+    object_output.close()
 
     files = glob.glob(arguments_strOut)
     img = fz.convert_from_file(files[0])
@@ -223,23 +223,3 @@ def convertToOpticalFlow(first_img, second_image):
     # print('returning flo: ')
 
     return img
-
-
-if __name__ == '__main__':
-    tensorFirst = torch.FloatTensor(
-        numpy.array(PIL.Image.open(arguments_strFirst))[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (
-                1.0 / 255.0))
-    tensorSecond = torch.FloatTensor(
-        numpy.array(PIL.Image.open(arguments_strSecond))[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (
-                1.0 / 255.0))
-
-    tensorOutput = estimate(tensorFirst, tensorSecond)
-
-    objectOutput = open(arguments_strOut, 'wb')
-
-    numpy.array([80, 73, 69, 72], numpy.uint8).tofile(objectOutput)
-    numpy.array([tensorOutput.size(2), tensorOutput.size(1)], numpy.int32).tofile(objectOutput)
-    numpy.array(tensorOutput.numpy().transpose(1, 2, 0), numpy.float32).tofile(objectOutput)
-
-    objectOutput.close()
-# end

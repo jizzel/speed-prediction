@@ -1,10 +1,11 @@
-from model import CNNModel
-import cv2
 import sys
 import time
+
+import cv2
 import numpy as np
-from optical_flow import convertToOpticalFlow
-import matplotlib.pyplot as plt
+
+from model import CNNModel
+from optical_flow import get_optical_flow
 
 PATH_DATA_FOLDER = './data/'
 PATH_TEST_LABEL = PATH_DATA_FOLDER + 'test.txt'
@@ -14,11 +15,7 @@ PATH_COMBINED_TEST_VIDEO_OUTPUT = PATH_DATA_FOLDER + 'combined_test_output.mp4'
 PATH_TEST_IMAGES_FOLDER = PATH_DATA_FOLDER + 'test_images/'
 PATH_TEST_IMAGES_FLOW_FOLDER = PATH_DATA_FOLDER + 'test_images_flow/'
 
-# TYPE_FLOW_PRECOMPUTED = 0
-# TYPE_ORIGINAL = 1
-
 MODEL_NAME = 'CNNModel_flow'
-# MODEL_NAME = 'CNNModel_combined'
 
 PRE_TRAINED_WEIGHTS = './best' + MODEL_NAME + '.h5'
 
@@ -33,9 +30,6 @@ def predict_from_video(video_input_path, original_video_output_path, combined_vi
     fps = int(video_reader.get(cv2.CAP_PROP_FPS))
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    # fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    # fourcc = 0x00000021
-    # fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
     video_writer = cv2.VideoWriter(original_video_output_path, fourcc, fps, frame_size)
     video_writer_combined = cv2.VideoWriter(combined_video_output_path, fourcc, fps, frame_size)
 
@@ -55,9 +49,9 @@ def predict_from_video(video_input_path, original_video_output_path, combined_vi
     # font = cv2.FONT_HERSHEY_SIMPLEX
     font = cv2.QT_FONT_NORMAL
     place = (50, 50)
-    fontScale = 1
-    fontColor = (0, 0, 255)
-    lineType = 2
+    font_scale = 1
+    font_color = (0, 0, 255)
+    line_type = 2
 
     count = 0
     while True:
@@ -65,27 +59,21 @@ def predict_from_video(video_input_path, original_video_output_path, combined_vi
         if ret is False:
             break
 
-        flow_image_bgr_next = convertToOpticalFlow(prev_frame, next_frame)
+        flow_image_bgr_next = get_optical_flow(prev_frame, next_frame)
         flow_image_bgr = (
-                                     flow_image_bgr_prev1 + flow_image_bgr_prev2 + flow_image_bgr_prev3 + flow_image_bgr_prev4 + flow_image_bgr_next) / 4
+                                     flow_image_bgr_prev1 + flow_image_bgr_prev2 + flow_image_bgr_prev3 +
+                                     flow_image_bgr_prev4 + flow_image_bgr_next) / 4
 
         curr_image = cv2.cvtColor(next_frame, cv2.COLOR_BGR2RGB)
 
         combined_image_save = 0.1 * curr_image + flow_image_bgr
 
-        # CHOOSE IF WE WANT TO TEST WITH ONLY OPTICAL FLOW OR A COMBINATION OF VIDEO AND OPTICAL FLOW
         combined_image = flow_image_bgr
-        # combined_image = combined_image_save
 
         # check this Joseph
         combined_image_test = cv2.normalize(combined_image, None, alpha=-1, beta=1, norm_type=cv2.NORM_MINMAX,
                                             dtype=cv2.CV_32F)
 
-        # plt.imshow(combined_image)
-        # plt.show()
-
-        # CHOOSE IF WE WANT TO TEST WITH ONLY OPTICAL FLOW OR A COMBINATION OF VIDEO AND OPTICAL FLOW
-        # combined_image_test = cv2.resize(combined_image, (0,0), fx=0.5, fy=0.5)
         combined_image_test = cv2.resize(combined_image_test, (0, 0), fx=0.5, fy=0.5)
 
         combined_image_test = combined_image_test.reshape(1, combined_image_test.shape[0], combined_image_test.shape[1],
@@ -95,10 +83,8 @@ def predict_from_video(video_input_path, original_video_output_path, combined_vi
 
         predicted_labels.append(prediction[0][0])
 
-        # print(combined_image.shape, np.mean(flow_image_bgr), prediction[0][0]) str(format(4.232542352342, '.2f'))
-
-        cv2.putText(next_frame, str(format(prediction[0][0], '.3f')), place, font, fontScale, fontColor, lineType)
-        cv2.putText(combined_image_save, str(format(prediction[0][0], '3f')), place, font, fontScale, fontColor, lineType)
+        cv2.putText(next_frame, str(format(prediction[0][0], '.3f')), place, font, font_scale, font_color, line_type)
+        cv2.putText(combined_image_save, str(format(prediction[0][0], '3f')), place, font, font_scale, font_color, line_type)
 
         video_writer.write(next_frame)
         video_writer_combined.write(combined_image_save.astype('uint8'))
