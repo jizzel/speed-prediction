@@ -26,7 +26,7 @@ The recent advancement in artificial intelligence (AI) and the rapid increase in
 8. After step f, the output is stored as in the root directory as a video named, “test_output.mp4”
 
 ##### Sample of our OutPut results
-![Video 1](https://github.com/jizzel/speed-prediction/blob/master/OutputSample/1)
+![Video 1](https://github.com/jizzel/speed-prediction/blob/master/OutputSample/1.mp4)
 
 **References**
 - [1]	F. D, ‘Batch normalization in Neural Networks’, Medium, Oct. 25, 2017. https://towardsdatascience.com/batch-normalization-in-neural-networks-1ac91516821c (accessed May 19, 2020).
