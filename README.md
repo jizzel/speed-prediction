@@ -25,6 +25,9 @@ The recent advancement in artificial intelligence (AI) and the rapid increase in
 7. Run “python test_model.py” to predict speed for the test.mp4 video. Note that you can ignore the steps 5 and 6, and run only this step for prediction using our already trained model. Thus, if you like to test our model only.
 8. After step f, the output is stored as in the root directory as a video named, “test_output.mp4”
 
+##### Sample of our OutPut results
+![Video 1](https://github.com/jizzel/speed-prediction/blob/master/OutputSample/1)
+
 **References**
 - [1]	F. D, ‘Batch normalization in Neural Networks’, Medium, Oct. 25, 2017. https://towardsdatascience.com/batch-normalization-in-neural-networks-1ac91516821c (accessed May 19, 2020).
 - [2]	J. Brownlee, ‘Dropout Regularization in Deep Learning Models With Keras’, Machine Learning Mastery, Jun. 19, 2016. https://machinelearningmastery.com/dropout-regularization-deep-learning-models-keras/ (accessed May 19, 2020).
