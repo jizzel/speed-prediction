@@ -36,4 +36,4 @@ The recent advancement in artificial intelligence (AI) and the rapid increase in
 - [2]	J. Brownlee, ‘Dropout Regularization in Deep Learning Models With Keras’, Machine Learning Mastery, Jun. 19, 2016. https://machinelearningmastery.com/dropout-regularization-deep-learning-models-keras/ (accessed May 19, 2020).
 - [3]	A. Burton and J. Radford, Thinking in perspective: critical essays in the study of thought processes. Methuen, 1978.
 
-Paper link - 
+Paper link - Pending...
