@@ -1,8 +1,7 @@
-# **VEHICLE SPEED ESTIMATION BASED ON OPTICAL FLOW AND DEEP LEARNING**
-### **Predicting the Speed of a Vehicle from a Dashboard Camera Video**
+### **Enhancement of Vehicle Speed Estimation Based on Optical Flow and Deep Learning Approaches**
 **Abstract**
 
-Recent advancements in AI have inspired the redevelopment and refinement of existing solutions in computer vision, image, and video analysis technology for better performance. Videos contain a large amount of information and analyzing them enable us to manage challenges in motion detection and tracking, speed estimation and others. The speed estimation of moving objects from a video is one of the most important topics studied in computer vision. It is one of the key components to be addressed in transportation systems, robotics, military, and maritime operations, sports, and other fields. Building intelligent vehicles that have fail-safe features to operate on roads is one of steps towards the development of smart cities. Predicting the speed of a vehicle from its dashboard camera video serves as a significant aid for such vehicles and relevant for other use cases such as in sports. In this study, we investigate modern methods of optical flow estimation that employ deep learning approaches and use Convolutional Neural Networks (CNN) to experiment and better predict the speed of a car from its dashboard camera video with enhanced accuracy in real-time capabilities. Our results show predictions with very minimal error (MSE: 0.3942) for both day and night scenes.
+In recent times, the subject of Intelligent vehicles has become very popular. The inspiration of this popularity cannot be discussed without mentioning computer vision and deep learning. This is because many vehicles, today, have all kinds of high-quality cameras installed on them to capture videos for different benefits. Object tracking and speed estimation are important tasks in video processing. Several methods for speed estimation have been proposed. This paper deals with speed estimation of a car from a video. We propose a method for estimating the speed of a car, with better accuracy, from a video captured by the car’s dashboard camera. The method uses two networks, one for estimating the displacement of the car, and the other for learning the speed labels. We perform experiments applying several image-processing techniques and using a lightweight and efficient optical flow estimation based deep learning approaches to achieve this goal. The proposed model is trained on the comma.ai speed challenge dataset and the results are evaluated and compared to other submissions on this challenge.
  
 **How to Setup And Test (Use) The Program**
  
@@ -31,9 +30,5 @@ Recent advancements in AI have inspired the redevelopment and refinement of exis
 ![Video 1](https://github.com/jizzel/speed-prediction/blob/master/OutputSample/3.gif)
 ![Video 1](https://github.com/jizzel/speed-prediction/blob/master/OutputSample/4.gif)
 
-**References**
-- [1]	F. D, ‘Batch normalization in Neural Networks’, Medium, Oct. 25, 2017. https://towardsdatascience.com/batch-normalization-in-neural-networks-1ac91516821c (accessed May 19, 2020).
-- [2]	J. Brownlee, ‘Dropout Regularization in Deep Learning Models With Keras’, Machine Learning Mastery, Jun. 19, 2016. https://machinelearningmastery.com/dropout-regularization-deep-learning-models-keras/ (accessed May 19, 2020).
-- [3]	A. Burton and J. Radford, Thinking in perspective: critical essays in the study of thought processes. Methuen, 1978.
 
 Paper link - Pending...
